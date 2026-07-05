@@ -1,0 +1,59 @@
+---
+// A marca do site (DESIGN §7 / BRIEFING item 0): autora + obra, como um livro.
+// "Meyrele Torres" em Fraunces sobre "ASTERISMO ⁂ CATÁLOGO DE TRABALHOS" em
+// Plex Mono. O ⁂ (U+2042) é a única marca reduzida; sempre em rubrica.
+import { localizedUrl, useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<a
+  class="marca"
+  href={localizedUrl(lang)}
+  aria-label={`${t('site.autora')} · ${t('site.titulo')} — ${t('site.subtitulo')}`}
+>
+  <span class="marca__autora">{t('site.autora')}</span>
+  <span class="marca__obra">
+    {t('site.titulo')}
+    <span class="marca__glifo" aria-hidden="true">⁂</span>
+    {t('site.subtitulo')}
+  </span>
+</a>
+
+<style>
+  .marca {
+    display: inline-block;
+    text-decoration: none;
+    color: var(--tinta);
+  }
+  .marca__autora {
+    display: block;
+    font-family: var(--fonte-display);
+    font-weight: 500;
+    font-size: 1.5rem;
+    line-height: 1;
+    font-variation-settings: 'opsz' 40;
+  }
+  .marca__obra {
+    display: block;
+    margin-top: 0.4rem;
+    font-family: var(--fonte-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.66rem;
+    color: var(--tinta);
+  }
+  .marca__glifo {
+    color: var(--rubrica);
+  }
+  .marca:hover .marca__autora {
+    text-decoration: underline;
+    text-decoration-color: var(--rubrica);
+    text-underline-offset: 0.15em;
+  }
+</style>

@@ -1,0 +1,235 @@
+---
+// A assinatura do site (DESIGN §4): cada projeto é uma ficha catalográfica.
+// Cota no canto (Plex Mono), título em Fraunces, metadados, tags como carimbos,
+// furo sugerido na base e — quando houver — a capa "grampeada" com leve rotação.
+// Hover: o título se "compõe" (caracteres resolvem de glifos aleatórios).
+import { Image } from 'astro:assets';
+import { tagLabel } from '../lib/tags';
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+import type { ProjetoData } from '../lib/projetos';
+
+interface Props {
+  slug: string;
+  lang: Lang;
+  href: string;
+  fallback?: boolean;
+  data: ProjetoData;
+}
+const { lang, href, fallback = false, data } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<article
+  class="ficha"
+  data-tags={data.tags.join(' ')}
+  data-ano={data.ano}
+  data-destaque={data.destaque ? '1' : '0'}
+>
+  <a class="ficha__link" href={href}>
+    <header class="ficha__topo">
+      <span class="cota">{data.cota}</span>
+      {data.destaque && <span class="rotulo ficha__destaque">{t('ficha.destaque')}</span>}
+    </header>
+
+    {
+      data.capa ? (
+        <div class="ficha__foto">
+          <Image src={data.capa} alt="" width={520} densities={[1, 2]} loading="lazy" />
+        </div>
+      ) : (
+        <div class="ficha__foto ficha__foto--vazia" aria-hidden="true">
+          <span class="ficha__glifo">⁂</span>
+        </div>
+      )
+    }
+
+    <h2 class="ficha__titulo" data-texto={data.titulo}>{data.titulo}</h2>
+    {data.subtitulo && <p class="ficha__subtitulo">{data.subtitulo}</p>}
+
+    <p class="ficha__meta">
+      <span class="rotulo">{data.ano}</span>
+      <span class="ficha__inst">{data.instituicao}</span>
+    </p>
+  </a>
+
+  <ul class="ficha__tags" aria-label={t('catalogo.classificacao')}>
+    {data.tags.map((tg) => <li class="carimbo">{tagLabel(tg, lang)}</li>)}
+  </ul>
+
+  {fallback && <p class="rotulo ficha__fallback">{t('projeto.somentePt')}</p>}
+</article>
+
+<style>
+  .ficha {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-2);
+    background: var(--polen-sombra);
+    border: 1px solid var(--filete);
+    padding: var(--espaco-3) var(--espaco-3) var(--espaco-4);
+    transition: opacity var(--transicao);
+  }
+  /* Furo sugerido na base (DESIGN §4): único canto não-reto do projeto. */
+  .ficha::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: var(--polen);
+    border: 1px solid var(--filete);
+    border-radius: 50%;
+    transform: translate(-50%, 50%);
+  }
+
+  .ficha__link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-2);
+  }
+  .ficha__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .ficha__topo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--espaco-2);
+  }
+  .ficha__destaque {
+    color: var(--rubrica-texto);
+  }
+
+  /* Capa "grampeada": leve rotação (0.5–1°), filete de contorno. */
+  .ficha__foto {
+    border: 1px solid var(--filete);
+    background: var(--polen);
+    transform: rotate(-0.7deg);
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+  }
+  .ficha__foto :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .ficha__foto--vazia {
+    display: grid;
+    place-items: center;
+  }
+  .ficha__glifo {
+    font-family: var(--fonte-display);
+    font-size: 2.4rem;
+    color: color-mix(in srgb, var(--grafite) 55%, transparent);
+  }
+
+  .ficha__titulo {
+    font-size: 1.5rem;
+    margin: 0;
+    font-variation-settings: 'opsz' 72;
+  }
+  .ficha:hover .ficha__titulo,
+  .ficha:focus-within .ficha__titulo {
+    text-decoration: underline;
+    text-decoration-color: var(--rubrica);
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+  }
+
+  .ficha__subtitulo {
+    margin: 0;
+    color: var(--grafite);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .ficha__meta {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem var(--espaco-2);
+  }
+  .ficha__inst {
+    font-size: 0.85rem;
+    color: var(--grafite);
+  }
+
+  .ficha__tags {
+    list-style: none;
+    margin: auto 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  /* Tags como carimbos (DESIGN §7). */
+  .carimbo {
+    font-family: var(--fonte-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.62rem;
+    color: var(--grafite);
+    border: 1px solid var(--filete);
+    padding: 0.2rem 0.45rem;
+    white-space: nowrap;
+  }
+
+  .ficha__fallback {
+    margin: 0;
+    color: var(--rubrica-texto);
+  }
+</style>
+
+<script>
+  // Efeito de "tipos móveis sendo compostos" no hover do título (DESIGN §4).
+  // Respeita prefers-reduced-motion: sem JS de movimento, só o sublinhado (CSS).
+  const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduz) {
+    const GLIFOS = '⁂*·—ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    document.querySelectorAll<HTMLElement>('.ficha__titulo').forEach((el) => {
+      const alvo = el.dataset.texto ?? el.textContent ?? '';
+      let raf = 0;
+      let frame = 0;
+      const passos = 18;
+      const tick = () => {
+        frame++;
+        const prog = Math.min(frame / passos, 1);
+        const revelado = Math.floor(prog * alvo.length);
+        let saida = '';
+        for (let i = 0; i < alvo.length; i++) {
+          const ch = alvo[i];
+          saida += i < revelado || ch === ' '
+            ? ch
+            : GLIFOS[Math.floor(Math.random() * GLIFOS.length)];
+        }
+        el.textContent = saida;
+        if (prog < 1) raf = requestAnimationFrame(tick);
+        else el.textContent = alvo;
+      };
+      const iniciar = () => {
+        cancelAnimationFrame(raf);
+        frame = 0;
+        raf = requestAnimationFrame(tick);
+      };
+      const parar = () => {
+        cancelAnimationFrame(raf);
+        el.textContent = alvo;
+      };
+      const card = el.closest('.ficha');
+      card?.addEventListener('mouseenter', iniciar);
+      card?.addEventListener('mouseleave', parar);
+      card?.addEventListener('focusin', iniciar);
+      card?.addEventListener('focusout', parar);
+    });
+  }
+</script>

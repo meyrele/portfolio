@@ -1,0 +1,74 @@
+---
+import Marca from './Marca.astro';
+import LanguageSelect from './LanguageSelect.astro';
+import { localizedUrl, useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  path?: string;
+  active?: 'catalogo' | 'sobre';
+}
+const { lang, path = '', active } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<header class="cabecalho">
+  <div class="cabecalho__interno contido">
+    <Marca lang={lang} />
+    <nav class="cabecalho__nav" aria-label={t('nav.catalogo')}>
+      <a
+        class="cabecalho__link"
+        href={localizedUrl(lang)}
+        aria-current={active === 'catalogo' ? 'page' : undefined}
+      >
+        {t('nav.catalogo')}
+      </a>
+      <a
+        class="cabecalho__link"
+        href={localizedUrl(lang, 'sobre')}
+        aria-current={active === 'sobre' ? 'page' : undefined}
+      >
+        {t('nav.sobre')}
+      </a>
+      <LanguageSelect lang={lang} path={path} />
+    </nav>
+  </div>
+</header>
+
+<style>
+  .cabecalho {
+    border-bottom: 1px solid var(--filete);
+  }
+  .cabecalho__interno {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--espaco-3);
+    padding-block: var(--espaco-3);
+  }
+  .cabecalho__nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--espaco-3);
+  }
+  .cabecalho__link {
+    font-family: var(--fonte-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    color: var(--tinta);
+    text-decoration: none;
+  }
+  .cabecalho__link:hover,
+  .cabecalho__link[aria-current='page'] {
+    color: var(--rubrica-texto);
+  }
+  .cabecalho__link[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--rubrica);
+    text-underline-offset: 0.3em;
+  }
+</style>

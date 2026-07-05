@@ -1,0 +1,37 @@
+---
+// Seletor de idioma escrito como troca de edição (DESIGN §7).
+// Aponta para a mesma página na outra edição (mesmo `path` lógico).
+import { otherLang, localizedUrl } from '../i18n/utils';
+import { ui, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Caminho lógico sem prefixo de idioma (ex.: 'sobre', 'projetos/slug'). */
+  path?: string;
+}
+const { lang, path = '' } = Astro.props;
+const alvo = otherLang(lang);
+---
+
+<a class="edicao" href={localizedUrl(alvo, path)} hreflang={alvo} lang={alvo}>
+  {ui[alvo]['lang.edicao']}
+</a>
+
+<style>
+  .edicao {
+    font-family: var(--fonte-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    color: var(--grafite);
+    text-decoration: none;
+    border: 1px solid var(--filete);
+    padding: 0.35rem 0.6rem;
+    white-space: nowrap;
+    transition: color var(--transicao), border-color var(--transicao);
+  }
+  .edicao:hover {
+    color: var(--rubrica-texto);
+    border-color: var(--rubrica);
+  }
+</style>

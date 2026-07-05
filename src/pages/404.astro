@@ -1,0 +1,53 @@
+---
+// 404: a lacuna do site. O asterismo ⁂ marca, na tipografia real, uma quebra
+// ou lacuna no texto — fecha o conceito (DESIGN §7). Página única (GitHub
+// Pages serve /404.html), então mostra as duas edições.
+import Base from '../layouts/Base.astro';
+import { localizedUrl } from '../i18n/utils';
+
+const catalogoPt = localizedUrl('pt');
+const catalogoEn = localizedUrl('en');
+---
+
+<Base lang="pt" title="404" path="" noAlternates>
+  <section class="erro contido">
+    <p class="erro__glifo" aria-hidden="true">⁂</p>
+    <p class="erro__msg" lang="pt-BR">Obra não catalogada.</p>
+    <p class="erro__msg erro__msg--en" lang="en">Uncatalogued work.</p>
+    <p class="erro__links rotulo">
+      <a href={catalogoPt}>Voltar ao catálogo</a>
+      <span aria-hidden="true">·</span>
+      <a href={catalogoEn} lang="en">Back to the catalogue</a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  .erro {
+    text-align: center;
+    padding-block: var(--espaco-8);
+  }
+  .erro__glifo {
+    font-family: var(--fonte-display);
+    color: var(--rubrica);
+    font-size: clamp(4rem, 18vw, 9rem);
+    line-height: 1;
+    margin: 0 0 var(--espaco-4);
+  }
+  .erro__msg {
+    font-family: var(--fonte-display);
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    margin: 0;
+  }
+  .erro__msg--en {
+    color: var(--grafite);
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    margin-bottom: var(--espaco-6);
+  }
+  .erro__links {
+    display: inline-flex;
+    gap: var(--espaco-2);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+</style>

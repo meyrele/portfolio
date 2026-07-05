@@ -1,0 +1,119 @@
+---
+// Página "Sobre" = a bibliotecária (BRIEFING §2.7): bio curta, áreas de
+// atuação (derivadas da própria taxonomia), contato, CV e LinkedIn.
+import Base from '../../layouts/Base.astro';
+import { tags } from '../../lib/tags';
+import { useTranslations } from '../../i18n/utils';
+import { langs, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return langs.map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params as { lang: Lang };
+const t = useTranslations(lang);
+
+// Bio curta — EDITAR AQUI. Mantém o tom seco e bibliográfico do site.
+const bio = {
+  pt: [
+    'Meyrele Torres é designer de informação. Trabalha na fronteira entre dados, editorial e interface — transformando material complexo (bases públicas, pesquisa acadêmica, acervos institucionais) em objetos legíveis e navegáveis.',
+    'Este catálogo reúne trabalhos em visualização de dados, UI/UX, identidade, ilustração e automação editorial, realizados com instituições como o SoU_Ciência (Unifesp) e o Climate Policy Initiative (PUC-Rio).',
+  ],
+  en: [
+    'Meyrele Torres is an information designer working at the intersection of data, editorial and interface — turning complex material (public datasets, academic research, institutional archives) into legible, navigable objects.',
+    'This catalogue gathers work in data visualization, UI/UX, identity, illustration and editorial automation, produced with institutions such as SoU_Ciência (Unifesp) and the Climate Policy Initiative (PUC-Rio).',
+  ],
+};
+
+// TODO (Meyrele): substituir pelos URLs reais.
+const linkedin = 'https://www.linkedin.com/';
+const cv = '#';
+const email = 'meyreletorres@gmail.com';
+---
+
+<Base
+  lang={lang}
+  title={t('sobre.titulo')}
+  path="sobre"
+  active="sobre"
+>
+  <div class="contido sobre">
+    <div class="sobre__grid">
+      <div class="sobre__retrato" aria-hidden="true">
+        <span class="sobre__glifo">⁂</span>
+      </div>
+
+      <div class="sobre__texto">
+        <h1>{t('sobre.titulo')}</h1>
+        {bio[lang].map((p) => <p>{p}</p>)}
+
+        <h2 class="rotulo sobre__sub">{t('sobre.areas')}</h2>
+        <ul class="sobre__areas">
+          {tags.map((tag) => <li class="carimbo">{tag[lang]}</li>)}
+        </ul>
+
+        <h2 class="rotulo sobre__sub">{t('sobre.contato')}</h2>
+        <ul class="sobre__contato">
+          <li><a href={`mailto:${email}`}>{email}</a></li>
+          <li><a href={linkedin} rel="me">LinkedIn</a></li>
+          <li><a href={cv}>{t('sobre.cv')}</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .sobre {
+    padding-block: var(--espaco-6);
+  }
+  .sobre__grid {
+    display: grid;
+    gap: var(--espaco-6);
+  }
+  @media (min-width: 820px) {
+    .sobre__grid {
+      grid-template-columns: 14rem 1fr;
+      align-items: start;
+    }
+  }
+  .sobre__retrato {
+    aspect-ratio: 3 / 4;
+    border: 1px solid var(--filete);
+    background: var(--polen-sombra);
+    display: grid;
+    place-items: center;
+  }
+  .sobre__glifo {
+    font-family: var(--fonte-display);
+    font-size: 3rem;
+    color: color-mix(in srgb, var(--grafite) 50%, transparent);
+  }
+  .sobre__texto {
+    max-width: var(--largura-texto);
+  }
+  .sobre__sub {
+    color: var(--tinta);
+    margin-top: var(--espaco-6);
+    padding-bottom: var(--espaco-1);
+    border-bottom: 1px solid var(--filete);
+  }
+  .sobre__areas {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .sobre__contato {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espaco-3);
+    font-family: var(--fonte-mono);
+    font-size: 0.85rem;
+  }
+</style>

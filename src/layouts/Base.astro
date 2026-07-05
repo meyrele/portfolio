@@ -1,0 +1,97 @@
+---
+// Layout base de todas as páginas. Importa as três vozes tipográficas
+// (self-hosted via @fontsource — zero request externo, DESIGN §3 / performance),
+// monta <head> com SEO/OG e hreflang, e envolve o conteúdo em Header + Footer.
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/literata';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { useTranslations, localizedUrl } from '../i18n/utils';
+import { type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Título específico da página (sem o nome da autora, que é anexado). */
+  title: string;
+  description?: string;
+  /** Caminho lógico sem prefixo de idioma (para hreflang e troca de edição). */
+  path?: string;
+  active?: 'catalogo' | 'sobre';
+  /** Quando true, não emite links hreflang alternativos (ex.: 404). */
+  noAlternates?: boolean;
+}
+const {
+  lang,
+  title,
+  description,
+  path = '',
+  active,
+  noAlternates = false,
+} = Astro.props;
+
+const t = useTranslations(lang);
+const site = Astro.site ?? new URL('https://meyrele.github.io');
+
+// O nome da autora nunca falta no <title> (BRIEFING item 0).
+const tituloCompleto = `${title} — ${t('site.autora')} · ${t('site.titulo')}`;
+const desc = description ?? t('site.descricao');
+
+const canonical = new URL(localizedUrl(lang, path), site);
+const urlPt = new URL(localizedUrl('pt', path), site);
+const urlEn = new URL(localizedUrl('en', path), site);
+const favicon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+// OG image genérica do catálogo (fase 1). Absoluta, como exigem os scrapers.
+const ogImage = new URL(
+  `${import.meta.env.BASE_URL.replace(/\/$/, '')}/og.png`,
+  site,
+).href;
+const htmlLang = lang === 'pt' ? 'pt-BR' : 'en';
+---
+
+<!doctype html>
+<html lang={htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={desc} />
+    <link rel="icon" type="image/svg+xml" href={favicon} />
+    <link rel="canonical" href={canonical.href} />
+
+    {
+      !noAlternates && (
+        <>
+          <link rel="alternate" hreflang="pt-BR" href={urlPt.href} />
+          <link rel="alternate" hreflang="en" href={urlEn.href} />
+          <link rel="alternate" hreflang="x-default" href={urlPt.href} />
+        </>
+      )
+    }
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:locale" content={lang === 'pt' ? 'pt_BR' : 'en_US'} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${t('site.autora')} · ${t('site.titulo')}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={tituloCompleto} />
+    <meta name="twitter:description" content={desc} />
+    <meta name="twitter:image" content={ogImage} />
+  </head>
+  <body>
+    <a class="pular-link" href="#conteudo">{t('nav.pular')}</a>
+    <Header lang={lang} path={path} active={active} />
+    <main id="conteudo">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>

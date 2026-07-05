@@ -1,0 +1,21 @@
+---
+// Raiz do site → redireciona para a edição original (pt). Meta-refresh porque
+// o host é estático (GitHub Pages). Usa localizedUrl para montar o caminho já
+// com o `base`, evitando concatenação manual (BASE_URL não tem barra final).
+import { localizedUrl } from '../i18n/utils';
+
+const alvo = localizedUrl('pt');
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0; url=${alvo}`} />
+    <link rel="canonical" href={alvo} />
+    <title>Meyrele Torres · Asterismo</title>
+  </head>
+  <body>
+    <p>Redirecionando ao catálogo… <a href={alvo}>Meyrele Torres · Asterismo ⁂</a></p>
+  </body>
+</html>

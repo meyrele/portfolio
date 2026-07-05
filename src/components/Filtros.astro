@@ -1,0 +1,105 @@
+---
+// Barra de classificação (DESIGN §5): filtrar é consultar o catálogo.
+// Os botões saem das tags realmente presentes no acervo — adicionar uma tag
+// nova num projeto cria o filtro sozinho (critério de aceite do BRIEFING).
+// União (OU) por padrão, com contagem por tag. Lógica client-side em index.
+import { tagLabel } from '../lib/tags';
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Pares [slug, contagem] das tags presentes, já ordenados. */
+  tags: [string, number][];
+  total: number;
+}
+const { lang, tags, total } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<aside class="filtros" aria-label={t('catalogo.classificacao')}>
+  <div class="filtros__cabeca">
+    <h2 class="rotulo filtros__titulo">{t('catalogo.classificacao')}</h2>
+    <button type="button" class="filtros__limpar rotulo" data-limpar hidden>
+      {t('catalogo.limpar')}
+    </button>
+  </div>
+
+  <ul class="filtros__lista">
+    <li>
+      <button type="button" class="carimbo carimbo--botao is-active" data-tag="" aria-pressed="true">
+        {t('catalogo.todos')} <span class="carimbo__n">{total}</span>
+      </button>
+    </li>
+    {
+      tags.map(([slug, n]) => (
+        <li>
+          <button type="button" class="carimbo carimbo--botao" data-tag={slug} aria-pressed="false">
+            {tagLabel(slug, lang)} <span class="carimbo__n">{n}</span>
+          </button>
+        </li>
+      ))
+    }
+  </ul>
+</aside>
+
+<style>
+  .filtros__cabeca {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--espaco-2);
+    margin-bottom: var(--espaco-2);
+    padding-bottom: var(--espaco-1);
+    border-bottom: 1px solid var(--filete);
+  }
+  .filtros__titulo {
+    margin: 0;
+    color: var(--tinta);
+  }
+  .filtros__limpar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--rubrica-texto);
+    padding: 0;
+  }
+  .filtros__lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .carimbo--botao {
+    background: none;
+    cursor: pointer;
+    color: var(--grafite);
+    transition:
+      color var(--transicao),
+      border-color var(--transicao),
+      background var(--transicao);
+  }
+  .carimbo--botao:hover {
+    border-color: var(--grafite);
+    color: var(--tinta);
+  }
+  /* Tag ativa = rubrica (DESIGN §7). */
+  .carimbo--botao.is-active {
+    color: var(--rubrica);
+    border-color: var(--rubrica);
+  }
+  .carimbo__n {
+    opacity: 0.7;
+    font-size: 0.9em;
+  }
+
+  /* No desktop, a classificação é uma coluna lateral fixa (DESIGN §5). */
+  @media (min-width: 900px) {
+    .filtros {
+      position: sticky;
+      top: var(--espaco-3);
+    }
+  }
+</style>

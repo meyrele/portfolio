@@ -1,0 +1,188 @@
+---
+// Catálogo = home (BRIEFING §5): sem hero, a estante é a abertura.
+// Barra de classificação lateral + grade de fichas, filtro client-side (OU).
+import Base from '../../layouts/Base.astro';
+import Filtros from '../../components/Filtros.astro';
+import Ficha from '../../components/Ficha.astro';
+import { getCatalogo, contarTags } from '../../lib/projetos';
+import { localizedUrl, useTranslations } from '../../i18n/utils';
+import { langs, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return langs.map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params as { lang: Lang };
+const t = useTranslations(lang);
+
+const cards = await getCatalogo(lang);
+const contagem = contarTags(cards);
+// Tags ordenadas por frequência (desc) e depois alfabética.
+const tags = [...contagem.entries()].sort(
+  (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
+);
+---
+
+<Base
+  lang={lang}
+  title={t('nav.catalogo')}
+  path=""
+  active="catalogo"
+  description={t('catalogo.intro')}
+>
+  <div class="contido catalogo">
+    <h1 class="visualmente-oculto">{t('nav.catalogo')}</h1>
+    <p class="catalogo__intro">{t('catalogo.intro')}</p>
+
+    <div class="catalogo__grid">
+      <Filtros lang={lang} tags={tags} total={cards.length} />
+
+      <div class="catalogo__acervo">
+        <p class="rotulo catalogo__contador">
+          <span data-contagem>{cards.length}</span>
+          {t('catalogo.contagem')}
+        </p>
+
+        <ul class="acervo" data-grade>
+          {
+            cards.map((card) => (
+              <li>
+                <Ficha
+                  slug={card.slug}
+                  lang={lang}
+                  href={localizedUrl(lang, `projetos/${card.slug}`)}
+                  fallback={card.fallback}
+                  data={card.data}
+                />
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="catalogo__vazio" data-vazio hidden>{t('catalogo.vazio')}</p>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .catalogo {
+    padding-block: var(--espaco-6);
+  }
+  .catalogo__intro {
+    font-family: var(--fonte-display);
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    line-height: 1.35;
+    max-width: 40ch;
+    margin-bottom: var(--espaco-6);
+    font-variation-settings: 'opsz' 40;
+  }
+  .catalogo__grid {
+    display: grid;
+    gap: var(--espaco-6);
+  }
+  @media (min-width: 900px) {
+    .catalogo__grid {
+      grid-template-columns: 15rem 1fr;
+      align-items: start;
+    }
+  }
+  .catalogo__contador {
+    margin: 0 0 var(--espaco-3);
+  }
+  .acervo {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--espaco-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 620px) {
+    .acervo {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1180px) {
+    .acervo {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .acervo > li[hidden] {
+    display: none;
+  }
+  .catalogo__vazio {
+    font-family: var(--fonte-display);
+    font-size: 1.2rem;
+    color: var(--grafite);
+    margin-top: var(--espaco-4);
+  }
+</style>
+
+<script>
+  // Filtro do catálogo: união (OU). Sem reload, sem framework.
+  const fichas = Array.from(document.querySelectorAll<HTMLElement>('.acervo > li'));
+  const botoes = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-tag]'));
+  const limpar = document.querySelector<HTMLButtonElement>('[data-limpar]');
+  const contador = document.querySelector<HTMLElement>('[data-contagem]');
+  const vazio = document.querySelector<HTMLElement>('[data-vazio]');
+  const ativos = new Set<string>();
+
+  function atualizar() {
+    let visiveis = 0;
+    for (const li of fichas) {
+      const ficha = li.querySelector('.ficha');
+      const tags = (ficha?.getAttribute('data-tags') ?? '').split(' ').filter(Boolean);
+      const mostra = ativos.size === 0 || tags.some((tg) => ativos.has(tg));
+      li.hidden = !mostra;
+      if (mostra) visiveis++;
+    }
+    if (contador) contador.textContent = String(visiveis);
+    if (vazio) vazio.hidden = visiveis !== 0;
+    if (limpar) limpar.hidden = ativos.size === 0;
+    for (const b of botoes) {
+      const tag = b.getAttribute('data-tag') ?? '';
+      const on = tag === '' ? ativos.size === 0 : ativos.has(tag);
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', String(on));
+    }
+  }
+
+  // Reflete o estado do filtro na URL (?tags=slug1,slug2) para poder
+  // compartilhar uma consulta por link (Etapa 3 do roteiro).
+  function sincronizarURL() {
+    const params = new URLSearchParams(window.location.search);
+    if (ativos.size > 0) params.set('tags', [...ativos].join(','));
+    else params.delete('tags');
+    const qs = params.toString();
+    const nova = window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash;
+    window.history.replaceState(null, '', nova);
+  }
+
+  function alternar(tag: string) {
+    if (tag === '') ativos.clear();
+    else if (ativos.has(tag)) ativos.delete(tag);
+    else ativos.add(tag);
+    atualizar();
+    sincronizarURL();
+  }
+
+  for (const b of botoes) {
+    b.addEventListener('click', () => alternar(b.getAttribute('data-tag') ?? ''));
+  }
+  limpar?.addEventListener('click', () => {
+    ativos.clear();
+    atualizar();
+    sincronizarURL();
+  });
+
+  // Estado inicial a partir da URL (só tags que existem no acervo).
+  const validas = new Set(
+    botoes.map((b) => b.getAttribute('data-tag') ?? '').filter(Boolean),
+  );
+  const inicial = new URLSearchParams(window.location.search).get('tags');
+  if (inicial) {
+    for (const tg of inicial.split(',')) if (validas.has(tg)) ativos.add(tg);
+  }
+  atualizar();
+</script>

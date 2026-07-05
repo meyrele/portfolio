@@ -1,0 +1,238 @@
+---
+// Cada página de projeto é um livro (BRIEFING §1): capa, miolo (Sobre →
+// Problema → Solução) e colofão. As seções são numeradas como folios por
+// contadores CSS. Fallback para pt quando a tradução não existe.
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../../layouts/Base.astro';
+import Colofao from '../../../components/Colofao.astro';
+import { getSlugs, getProjeto } from '../../../lib/projetos';
+import { tagLabel } from '../../../lib/tags';
+import { localizedUrl, useTranslations } from '../../../i18n/utils';
+import { langs, type Lang } from '../../../i18n/ui';
+
+export async function getStaticPaths() {
+  const slugs = await getSlugs();
+  return slugs.flatMap((slug) =>
+    langs.map((lang) => ({ params: { lang, slug } })),
+  );
+}
+
+const { lang, slug } = Astro.params as { lang: Lang; slug: string };
+const t = useTranslations(lang);
+
+const projeto = await getProjeto(slug, lang);
+if (!projeto) return Astro.rewrite('/404');
+const { entry, fallback } = projeto;
+const data = entry.data;
+const { Content } = await render(entry);
+---
+
+<Base
+  lang={lang}
+  title={data.titulo}
+  path={`projetos/${slug}`}
+  description={data.subtitulo ?? data.titulo}
+>
+  <article class="projeto contido">
+    <p class="projeto__voltar rotulo">
+      <a href={localizedUrl(lang)}>← {t('projeto.voltar')}</a>
+    </p>
+
+    <header class="projeto__capa-info">
+      <span class="cota">{data.cota}</span>
+      <h1 class="projeto__titulo">{data.titulo}</h1>
+      {data.subtitulo && <p class="projeto__subtitulo">{data.subtitulo}</p>}
+      <p class="rotulo projeto__papel">{data.papel}</p>
+      <ul class="projeto__tags" aria-label={t('catalogo.classificacao')}>
+        {data.tags.map((tg) => <li class="carimbo">{tagLabel(tg, lang)}</li>)}
+      </ul>
+    </header>
+
+    {
+      fallback && (
+        <aside class="projeto__aviso rotulo">
+          {t('projeto.somentePt')}
+          <a href={localizedUrl('pt', `projetos/${slug}`)}>{t('projeto.lerOriginal')}</a>
+        </aside>
+      )
+    }
+
+    {
+      data.capa ? (
+        <figure class="projeto__capa">
+          <Image
+            src={data.capa}
+            alt={data.subtitulo ?? data.titulo}
+            widths={[640, 960, 1280, 1600]}
+            sizes="(min-width: 1120px) 1120px, 100vw"
+          />
+        </figure>
+      ) : (
+        <div class="projeto__capa projeto__capa--vazia" aria-hidden="true">
+          <span class="projeto__glifo">⁂</span>
+        </div>
+      )
+    }
+
+    <div class="projeto__miolo" style={`--fl: '${t('projeto.folio')}'`}>
+      <Content />
+    </div>
+
+    <Colofao lang={lang} data={data} />
+  </article>
+</Base>
+
+<style>
+  .projeto {
+    padding-block: var(--espaco-6);
+  }
+  .projeto__voltar {
+    margin-bottom: var(--espaco-4);
+  }
+  .projeto__voltar a {
+    color: var(--grafite);
+    text-decoration: none;
+  }
+  .projeto__voltar a:hover {
+    color: var(--rubrica-texto);
+  }
+
+  .projeto__capa-info {
+    max-width: var(--largura-texto);
+  }
+  .projeto__titulo {
+    margin: var(--espaco-1) 0 var(--espaco-2);
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-variation-settings: 'opsz' 120, 'SOFT' 0;
+  }
+  .projeto__subtitulo {
+    font-family: var(--fonte-display);
+    font-weight: 300;
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    color: var(--grafite);
+    line-height: 1.3;
+    margin-bottom: var(--espaco-3);
+  }
+  .projeto__papel {
+    margin-bottom: var(--espaco-3);
+  }
+  .projeto__tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0;
+  }
+
+  .projeto__aviso {
+    margin: var(--espaco-4) 0 0;
+    padding: var(--espaco-2) var(--espaco-3);
+    border-left: 2px solid var(--rubrica);
+    background: var(--polen-sombra);
+    color: var(--tinta);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .projeto__aviso a {
+    color: var(--rubrica-texto);
+  }
+
+  /* Capa contida — nada de full-bleed gratuito (DESIGN §5). */
+  .projeto__capa {
+    margin: var(--espaco-6) 0;
+    border: 1px solid var(--filete);
+    background: var(--polen-sombra);
+  }
+  .projeto__capa :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .projeto__capa--vazia {
+    aspect-ratio: 16 / 9;
+    display: grid;
+    place-items: center;
+  }
+  .projeto__glifo {
+    font-family: var(--fonte-display);
+    font-size: clamp(3rem, 10vw, 6rem);
+    color: color-mix(in srgb, var(--grafite) 45%, transparent);
+  }
+
+  /* Miolo: coluna única de leitura, medida controlada (DESIGN §5). */
+  .projeto__miolo {
+    max-width: var(--largura-texto);
+    counter-reset: secao;
+    font-size: 1.05rem;
+  }
+  .projeto__miolo :global(h2) {
+    counter-increment: secao;
+    margin-top: var(--espaco-8);
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+  }
+  /* Folio da seção (DESIGN §5): "Sobre · fl. 1". */
+  .projeto__miolo :global(h2)::after {
+    content: ' · ' var(--fl) ' ' counter(secao);
+    display: block;
+    margin-top: 0.4rem;
+    font-family: var(--fonte-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--rubrica-texto);
+  }
+  .projeto__miolo :global(p) {
+    margin: 0 0 var(--espaco-3);
+  }
+  /* Imagens do miolo podem escapar levemente da medida do texto (sangria). */
+  .projeto__miolo :global(img) {
+    width: 100%;
+    margin: var(--espaco-4) 0;
+    border: 1px solid var(--filete);
+  }
+  @media (min-width: 1000px) {
+    .projeto__miolo :global(p img),
+    .projeto__miolo :global(img) {
+      max-width: calc(var(--largura-texto) + 8rem);
+      margin-inline: calc((var(--largura-texto) - 100%) / 2);
+    }
+  }
+</style>
+
+<script>
+  // Reveal sutil por seção no scroll: fade + 8px, uma única vez (DESIGN §6).
+  const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const alvos = document.querySelectorAll<HTMLElement>('.projeto__miolo > *');
+  if (!reduz && 'IntersectionObserver' in window) {
+    alvos.forEach((el) => el.classList.add('revelar'));
+    const obs = new IntersectionObserver(
+      (entradas) => {
+        for (const e of entradas) {
+          if (e.isIntersecting) {
+            e.target.classList.add('revelado');
+            obs.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' },
+    );
+    alvos.forEach((el) => obs.observe(el));
+  }
+</script>
+
+<style is:global>
+  .projeto__miolo > .revelar {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 400ms ease,
+      transform 400ms ease;
+  }
+  .projeto__miolo > .revelar.revelado {
+    opacity: 1;
+    transform: none;
+  }
+</style>

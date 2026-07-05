@@ -1,0 +1,81 @@
+---
+// Colofão do projeto (BRIEFING §1 / DESIGN §5): ficha técnica ao final do
+// "livro", montada automaticamente a partir do front-matter — como um colofão
+// real. Centralizado, aberto pelo asterismo ⁂ (único ornamento permitido).
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+import type { ProjetoData } from '../lib/projetos';
+
+interface Props {
+  lang: Lang;
+  data: ProjetoData;
+}
+const { lang, data } = Astro.props;
+const t = useTranslations(lang);
+
+const linhas: [string, string][] = [
+  [t('colofao.papel'), data.papel],
+  [t('colofao.ferramentas'), data.ferramentas.join(' · ')],
+  [t('colofao.instituicao'), data.instituicao],
+  [t('colofao.ano'), String(data.ano)],
+  [t('colofao.cota'), data.cota],
+];
+---
+
+<footer class="colofao">
+  <p class="colofao__glifo" aria-hidden="true">⁂</p>
+  <h2 class="colofao__titulo">{t('colofao.titulo')}</h2>
+  <dl class="colofao__lista">
+    {
+      linhas.map(([rotulo, valor]) => (
+        <div class="colofao__par">
+          <dt class="rotulo">{rotulo}</dt>
+          <dd class="colofao__valor">{valor}</dd>
+        </div>
+      ))
+    }
+  </dl>
+  <p class="rotulo colofao__tipos">
+    {t('rodape.stack')}
+  </p>
+</footer>
+
+<style>
+  .colofao {
+    margin-top: var(--espaco-8);
+    padding-top: var(--espaco-6);
+    border-top: 1px solid var(--filete);
+    text-align: center;
+  }
+  .colofao__glifo {
+    font-family: var(--fonte-display);
+    color: var(--rubrica);
+    font-size: 1.6rem;
+    margin: 0 0 var(--espaco-3);
+  }
+  .colofao__titulo {
+    font-size: 1.3rem;
+    margin-bottom: var(--espaco-4);
+  }
+  .colofao__lista {
+    margin: 0 auto;
+    max-width: 40ch;
+    display: grid;
+    gap: var(--espaco-2);
+  }
+  .colofao__par {
+    display: grid;
+    gap: 0.15rem;
+  }
+  .colofao__par dt {
+    color: var(--grafite);
+  }
+  .colofao__valor {
+    margin: 0;
+    color: var(--tinta);
+  }
+  .colofao__tipos {
+    margin-top: var(--espaco-6);
+    color: var(--grafite);
+  }
+</style>

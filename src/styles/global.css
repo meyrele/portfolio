@@ -1,0 +1,174 @@
+/* =========================================================================
+   Asterismo ⁂ — folha de estilo base
+   Direção visual vinculante: DESIGN.md. Um catálogo de biblioteca impresso
+   impossível: papel pólen, tinta quente, rubrica vermelha pontual.
+   ========================================================================= */
+
+:root {
+  /* Paleta (DESIGN §2) ---------------------------------------------------- */
+  --polen: #efe6d5;         /* fundo principal (papel pólen) */
+  --polen-sombra: #e3d7c0;  /* fichas, zebra, fundos secundários */
+  --tinta: #22201c;         /* texto principal (preto de tinta, nunca #000) */
+  --grafite: #6b6558;       /* metadados, legendas, texto secundário */
+  --rubrica: #b3271e;       /* acento: carimbos, tags ativas, foco, cota */
+  --rubrica-texto: #9c2018; /* variante escurecida p/ texto pequeno (AA) */
+  --selo-azul: #2b3a67;     /* acento raro: colofão, carimbo de edição */
+
+  --filete: color-mix(in srgb, var(--grafite) 40%, transparent);
+
+  /* Vozes tipográficas (DESIGN §3) --------------------------------------- */
+  --fonte-display: 'Fraunces Variable', Fraunces, 'Times New Roman', serif;
+  --fonte-corpo: 'Literata Variable', Literata, Georgia, serif;
+  --fonte-mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+
+  /* Grid de base 8px (DESIGN §5) ----------------------------------------- */
+  --espaco-1: 0.5rem;   /* 8  */
+  --espaco-2: 1rem;     /* 16 */
+  --espaco-3: 1.5rem;   /* 24 */
+  --espaco-4: 2rem;     /* 32 */
+  --espaco-6: 3rem;     /* 48 */
+  --espaco-8: 4rem;     /* 64 */
+
+  --largura-conteudo: 1120px;
+  --largura-texto: 68ch;
+
+  --transicao: 200ms ease;
+
+  color-scheme: light;
+}
+
+/* Reset enxuto ----------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 112.5%; /* ~18px base (corpo 17–19px, DESIGN §3) */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--polen);
+  color: var(--tinta);
+  font-family: var(--fonte-corpo);
+  line-height: 1.6;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Cabeçalhos na voz display (Fraunces) ---------------------------------- */
+h1,
+h2,
+h3 {
+  font-family: var(--fonte-display);
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0 0 var(--espaco-3);
+  font-variation-settings: 'opsz' 96, 'SOFT' 0, 'WONK' 0;
+}
+
+h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+h3 { font-size: 1.25rem; }
+
+p { margin: 0 0 var(--espaco-3); }
+
+a {
+  color: var(--rubrica-texto);
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+}
+a:hover { text-decoration-thickness: 2px; }
+
+img { max-width: 100%; height: auto; display: block; }
+
+hr {
+  border: none;
+  border-top: 1px solid var(--filete);
+  margin: var(--espaco-6) 0;
+}
+
+/* Foco visível (DESIGN §8) ---------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--rubrica);
+  outline-offset: 2px;
+}
+
+/* Primitivos compartilhados --------------------------------------------- */
+
+/* Rótulo em Plex Mono, caixa alta, tracking aberto (metadados/fichas). */
+.rotulo {
+  font-family: var(--fonte-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  color: var(--grafite);
+}
+
+/* Cota (call number) — Plex Mono, na voz da rubrica. */
+.cota {
+  font-family: var(--fonte-mono);
+  letter-spacing: 0.04em;
+  color: var(--rubrica-texto);
+  font-size: 0.8rem;
+}
+
+/* Filete de 1px — o único divisor permitido (nunca sombra). */
+.filete {
+  border: none;
+  border-top: 1px solid var(--filete);
+}
+
+/* Contêiner de conteúdo. */
+.contido {
+  width: 100%;
+  max-width: var(--largura-conteudo);
+  margin-inline: auto;
+  padding-inline: var(--espaco-3);
+}
+
+/* Link "pular para o conteúdo" (acessibilidade). */
+.pular-link {
+  position: absolute;
+  left: var(--espaco-2);
+  top: -3rem;
+  z-index: 100;
+  background: var(--tinta);
+  color: var(--polen);
+  padding: var(--espaco-1) var(--espaco-2);
+  font-family: var(--fonte-mono);
+  font-size: 0.8rem;
+  transition: top var(--transicao);
+}
+.pular-link:focus { top: var(--espaco-2); }
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Movimento reduzido (DESIGN §6): desliga tudo exceto mudanças de cor. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

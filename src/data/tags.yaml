@@ -1,0 +1,71 @@
+# Taxonomia de tags (sistema de classificação do catálogo).
+# Fonte única de verdade: editar aqui é suficiente para o filtro aparecer.
+# slug   = usado no front-matter dos projetos
+# pt/en  = rótulo bilíngue exibido no carimbo
+# codigo = prefixo de 2 letras da cota quando a tag é a categoria-principal
+#
+# Regras (validadas no build):
+#   - toda tag usada num projeto precisa existir aqui;
+#   - a `categoria-principal` de um projeto precisa existir aqui;
+#   - a `cota` precisa começar com o `codigo` da categoria-principal (ex.: DV·2024.01).
+
+- slug: dataviz
+  pt: "Visualização de dados"
+  en: "Data visualization"
+  codigo: DV
+- slug: infografia
+  pt: "Infografia"
+  en: "Infographics"
+  codigo: IN
+- slug: design-de-informacao
+  pt: "Design de informação"
+  en: "Information design"
+  codigo: DI
+- slug: ui-ux
+  pt: "UI/UX"
+  en: "UI/UX"
+  codigo: UX
+- slug: design-editorial
+  pt: "Design editorial"
+  en: "Editorial design"
+  codigo: ED
+- slug: projeto-grafico
+  pt: "Projeto gráfico"
+  en: "Print design"
+  codigo: PG
+- slug: ilustracao
+  pt: "Ilustração"
+  en: "Illustration"
+  codigo: IL
+- slug: motion
+  pt: "Motion graphics"
+  en: "Motion graphics"
+  codigo: MO
+- slug: branding
+  pt: "Identidade visual"
+  en: "Branding"
+  codigo: BR
+- slug: automacao
+  pt: "Automação"
+  en: "Automation"
+  codigo: AU
+- slug: dados
+  pt: "Ciência de dados"
+  en: "Data science"
+  codigo: CD
+- slug: web
+  pt: "Desenvolvimento web"
+  en: "Web development"
+  codigo: WB
+- slug: mapa
+  pt: "Cartografia de dados"
+  en: "Data cartography"
+  codigo: MA
+- slug: tipografia
+  pt: "Tipografia"
+  en: "Typography"
+  codigo: TI
+- slug: encadernacao
+  pt: "Encadernação"
+  en: "Bookbinding"
+  codigo: EN

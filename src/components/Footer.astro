@@ -1,0 +1,46 @@
+---
+// Rodapé = colofão do próprio site (BRIEFING item 5 / DESIGN §5).
+// Separado pelo asterismo ⁂, o único ornamento permitido no projeto.
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<footer class="rodape">
+  <div class="contido">
+    <p class="rodape__glifo" aria-hidden="true">⁂</p>
+    <p class="rotulo rodape__linha">{t('rodape.stack')}</p>
+    <p class="rotulo rodape__linha">
+      {t('rodape.licenca')} · <a href="mailto:meyreletorres@gmail.com">meyreletorres@gmail.com</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    margin-top: var(--espaco-8);
+    border-top: 1px solid var(--filete);
+    padding-block: var(--espaco-6);
+    text-align: center;
+  }
+  .rodape__glifo {
+    font-family: var(--fonte-display);
+    color: var(--rubrica);
+    font-size: 1.4rem;
+    margin: 0 0 var(--espaco-2);
+  }
+  .rodape__linha {
+    margin: 0.25rem 0;
+  }
+  .rodape a {
+    color: var(--grafite);
+  }
+  .rodape a:hover {
+    color: var(--rubrica-texto);
+  }
+</style>
