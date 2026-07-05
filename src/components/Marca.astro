@@ -12,11 +12,9 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<a
-  class="marca"
-  href={localizedUrl(lang)}
-  aria-label={`${t('site.autora')} · ${t('site.titulo')} — ${t('site.subtitulo')}`}
->
+<!-- Sem aria-label: o nome acessível vem do texto visível (WCAG 2.5.3
+     Label in Name). O glifo ⁂ é aria-hidden, então não polui o nome. -->
+<a class="marca" href={localizedUrl(lang)}>
   <span class="marca__autora">{t('site.autora')}</span>
   <span class="marca__obra">
     {t('site.titulo')}

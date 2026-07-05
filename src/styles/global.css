@@ -9,7 +9,9 @@
   --polen: #efe6d5;         /* fundo principal (papel pólen) */
   --polen-sombra: #e3d7c0;  /* fichas, zebra, fundos secundários */
   --tinta: #22201c;         /* texto principal (preto de tinta, nunca #000) */
-  --grafite: #6b6558;       /* metadados, legendas, texto secundário */
+  --grafite: #5e584c;       /* metadados, legendas, texto secundário
+                               (escurecido de #6B6558 p/ passar AA 4.5:1 sobre
+                               o fundo das fichas --polen-sombra; DESIGN §8) */
   --rubrica: #b3271e;       /* acento: carimbos, tags ativas, foco, cota */
   --rubrica-texto: #9c2018; /* variante escurecida p/ texto pequeno (AA) */
   --selo-azul: #2b3a67;     /* acento raro: colofão, carimbo de edição */
